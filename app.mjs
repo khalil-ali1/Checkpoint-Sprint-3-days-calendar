@@ -1,12 +1,12 @@
-// Polyfill handle if using CDN
 const { Temporal } = window;
 
+// 1. Initialize automatically to the current real-world Month and Year
 let currentYear = Temporal.Now.plainDateISO().year;
 let currentMonth = Temporal.Now.plainDateISO().month;
 let dynamicEvents = [];
 
-const monthsArray = [
-    "January", "February", "March", "April", "May", "June",
+const MONTHS_MAP = [
+    "", "January", "February", "March", "April", "May", "June",
     "July", "August", "September", "October", "November", "December"
 ];
 
@@ -23,27 +23,36 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 async function fetchEvents() {
     try {
-        // Replace with your real relative or absolute path
         const response = await fetch('days.json');
         dynamicEvents = await response.json();
     } catch (e) {
-        console.error("Failed to load days.json", e);
+        console.error("Could not load days.json", e);
     }
 }
 
 function setupDropdowns() {
     const monthSelect = document.getElementById("monthJump");
+    for (let m = 1; m <= 12; m++) {
+        monthSelect.add(new Option(MONTHS_MAP[m], m));
+    }
+    syncYearDropdownBounds(currentYear);
+}
+
+/**
+ * Ensures previous/next buttons never crash at selector endpoints
+ * by automatically adding missing options on the fly.
+ */
+function syncYearDropdownBounds(targetYear) {
     const yearSelect = document.getElementById("yearJump");
+    let options = Array.from(yearSelect.options).map(o => parseInt(o.value, 10));
 
-    monthsArray.forEach((m, idx) => {
-        let opt = new Option(m, idx + 1);
-        monthSelect.add(opt);
-    });
-
-    // Dynamically setup a generous chunk of years (e.g., 1900 to 2100)
-    for (let y = 1900; y <= 2100; y++) {
-        let opt = new Option(y, y);
-        yearSelect.add(opt);
+    if (!options.includes(targetYear)) {
+        const start = Math.min(targetYear, 1900);
+        const end = Math.max(targetYear, 2100);
+        yearSelect.innerHTML = "";
+        for (let y = start; y <= end; y++) {
+            yearSelect.add(new Option(y, y));
+        }
     }
 }
 
@@ -53,27 +62,53 @@ function navigateMonth(direction) {
 
     currentYear = date.year;
     currentMonth = date.month;
+
+    syncYearDropdownBounds(currentYear);
     updateCalendar();
 }
 
 function handleJump() {
-    currentMonth = parseInt(document.getElementById("monthJump").value);
-    currentYear = parseInt(document.getElementById("yearJump").value);
+    currentMonth = parseInt(document.getElementById("monthJump").value, 10);
+    currentYear = parseInt(document.getElementById("yearJump").value, 10);
     updateCalendar();
 }
 
+/**
+ * Calculates rule occurrences using Temporal PlainDate math
+ */
+function getFloatingDay(year, monthIndex, dayName, occurrence) {
+    const dayMap = { Monday: 1, Tuesday: 2, Wednesday: 3, Thursday: 4, Friday: 5, Saturday: 6, Sunday: 7 };
+    const targetDayOfWeek = dayMap[dayName];
+
+    if (occurrence === "last") {
+        let date = Temporal.PlainDate.from({ year, month: monthIndex, day: 1 });
+        date = date.with({ day: date.daysInMonth });
+        while (date.dayOfWeek !== targetDayOfWeek) {
+            date = date.subtract({ days: 1 });
+        }
+        return date.day;
+    } else {
+        let date = Temporal.PlainDate.from({ year, month: monthIndex, day: 1 });
+        while (date.dayOfWeek !== targetDayOfWeek) {
+            date = date.add({ days: 1 });
+        }
+        const occurrenceMap = { first: 1, second: 2, third: 3, fourth: 4 };
+        date = date.add({ weeks: occurrenceMap[occurrence] - 1 });
+        return date.day;
+    }
+}
+
 function updateCalendar() {
-    // Sync dropdown UI values
     document.getElementById("monthJump").value = currentMonth;
     document.getElementById("yearJump").value = currentYear;
 
-    const currentMonthName = monthsArray[currentMonth - 1];
+    const currentMonthName = MONTHS_MAP[currentMonth];
     document.getElementById("currentMonthYear").textContent = `${currentMonthName} ${currentYear}`;
 
     const container = document.getElementById("calendarContainer");
     container.innerHTML = "";
 
-    // 1. Generate Weekday Headers (Sunday first Column)
+    // 1. Grid Weekday Headers
     const daysOfWeekNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
     daysOfWeekNames.forEach(day => {
         const header = document.createElement("div");
@@ -83,18 +118,17 @@ function updateCalendar() {
         container.appendChild(header);
     });
 
-    // 2. Pre-calculate event day assignments for the targeted month/year
+    // 2. Pre-Map calculated events for this exact view
     const dayEventsMap = {};
     dynamicEvents.forEach(event => {
-        if (event.monthName === currentMonthName) {
-            const targetDay = getFloatingDay(currentYear, event.monthName, event.dayName, event.occurrence);
+        if (event.monthName.trim().toLowerCase() === currentMonthName.toLowerCase()) {
+            const targetDay = getFloatingDay(currentYear, currentMonth, event.dayName.trim(), event.occurrence.trim());
             if (!dayEventsMap[targetDay]) dayEventsMap[targetDay] = [];
             dayEventsMap[targetDay].push(event);
         }
     });
 
-    // 3. Handle grid offsets. 
-    // Temporal dayOfWeek maps Monday=1 ... Sunday=7. We need Sunday=0 for alignment.
+    // 3. Spacing Boxes Calculation (Transforms Temporal Sunday=7 to Grid Column 0)
     const firstOfMonth = Temporal.PlainDate.from({ year: currentYear, month: currentMonth, day: 1 });
     const startOffset = firstOfMonth.dayOfWeek === 7 ? 0 : firstOfMonth.dayOfWeek;
 
@@ -104,7 +138,7 @@ function updateCalendar() {
         container.appendChild(emptyBox);
     }
 
-    // 4. Render actual days
+    // 4. Generate Days and Append matching items dynamically
     const daysInMonth = firstOfMonth.daysInMonth;
     for (let day = 1; day <= daysInMonth; day++) {
         const dayBox = document.createElement("div");
@@ -112,10 +146,10 @@ function updateCalendar() {
         dayBox.setAttribute("role", "gridcell");
 
         const dayLabel = document.createElement("div");
+        dayLabel.className = "day-label";
         dayLabel.textContent = day;
         dayBox.appendChild(dayLabel);
 
-        // Inject matching events
         if (dayEventsMap[day]) {
             dayEventsMap[day].forEach(event => {
                 const evDiv = document.createElement("div");
@@ -129,7 +163,6 @@ function updateCalendar() {
                 dayBox.appendChild(evDiv);
             });
         }
-
         container.appendChild(dayBox);
     }
 }
