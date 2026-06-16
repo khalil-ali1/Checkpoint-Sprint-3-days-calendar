@@ -1,5 +1,4 @@
-// import { Temporal } from '@js-temporal/polyfill';
-const { Temporal } = window;
+import { Temporal } from 'https://esm.run/@js-temporal/polyfill@0.4.4';
 import { getFloatingDay } from './common.mjs';
 
 // 1. Initialize automatically to the current real-world Month and Year
