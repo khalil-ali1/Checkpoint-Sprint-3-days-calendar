@@ -27,12 +27,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   setupDropdowns();
   updateCalendar();
 
-  document
-    .getElementById("prevBtn")
-    .addEventListener("click", () => navigateMonth(-1));
-  document
-    .getElementById("nextBtn")
-    .addEventListener("click", () => navigateMonth(1));
+  document.getElementById("prevBtn").addEventListener("click", () => navigateMonth(-1));
+  document.getElementById("nextBtn").addEventListener("click", () => navigateMonth(1));
   document.getElementById("monthJump").addEventListener("change", handleJump);
   document.getElementById("yearJump").addEventListener("change", handleJump);
 });
@@ -60,9 +56,7 @@ function setupDropdowns() {
  */
 function syncYearDropdownBounds(targetYear) {
   const yearSelect = document.getElementById("yearJump");
-  let options = Array.from(yearSelect.options).map((o) =>
-    parseInt(o.value, 10),
-  );
+  let options = Array.from(yearSelect.options).map((o) => parseInt(o.value, 10));
 
   if (!options.includes(targetYear)) {
     const start = Math.min(targetYear, 1900);
@@ -80,8 +74,7 @@ function navigateMonth(direction) {
     month: currentMonth,
     day: 1,
   });
-  date =
-    direction === 1 ? date.add({ months: 1 }) : date.subtract({ months: 1 });
+  date = direction === 1 ? date.add({ months: 1 }) : date.subtract({ months: 1 });
 
   currentYear = date.year;
   currentMonth = date.month;
@@ -101,8 +94,7 @@ function updateCalendar() {
   document.getElementById("yearJump").value = currentYear;
 
   const currentMonthName = MONTHS_MAP[currentMonth];
-  document.getElementById("currentMonthYear").textContent =
-    `${currentMonthName} ${currentYear}`;
+  document.getElementById("currentMonthYear").textContent = `${currentMonthName} ${currentYear}`;
 
   const container = document.getElementById("calendarContainer");
   container.innerHTML = "";
@@ -129,15 +121,8 @@ function updateCalendar() {
   // 2. Pre-Map calculated events for this exact view
   const dayEventsMap = {};
   dynamicEvents.forEach((event) => {
-    if (
-      event.monthName.trim().toLowerCase() === currentMonthName.toLowerCase()
-    ) {
-      const targetDay = getFloatingDay(
-        currentYear,
-        currentMonth,
-        event.dayName.trim(),
-        event.occurrence.trim(),
-      );
+    if (event.monthName.trim().toLowerCase() === currentMonthName.toLowerCase()) {
+      const targetDay = getFloatingDay(currentYear, currentMonth, event.dayName.trim(), event.occurrence.trim());
       if (!dayEventsMap[targetDay]) dayEventsMap[targetDay] = [];
       dayEventsMap[targetDay].push(event);
     }
@@ -212,8 +197,7 @@ async function showEventDetailsModal(event) {
     if (response.ok) {
       descriptionText = await response.text();
     } else {
-      descriptionText =
-        "Error: Description could not be loaded from the server.";
+      descriptionText = "Error: Description could not be loaded from the server.";
     }
   } catch (err) {
     descriptionText = "Network error: Please check your connection.";
