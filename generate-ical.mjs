@@ -1,3 +1,5 @@
+import { Temporal } from "@js-temporal/polyfill"
+globalThis.Temporal = Temporal; 
 import { getFloatingDay } from "./common.mjs";
 import daysData from "./days.json" with { type: "json" };
 const start_year = 2020;
