@@ -1,0 +1,5 @@
+# Ignore the generated iCal calendar file
+days.ics
+
+# Ignore local Node dependencies folder
+node_modules/
