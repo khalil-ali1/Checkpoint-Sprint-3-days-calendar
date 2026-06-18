@@ -1,8 +1,7 @@
 import { Temporal } from "@js-temporal/polyfill";
 globalThis.Temporal = Temporal;
 import fs from "node:fs";
-import { getFloatingDay } from "./common.mjs";
-import { fetchDescription } from "./common.mjs";
+import { getFloatingDay, fetchDescription } from "./common.mjs";
 // 3. Parse JSON using stable methods to prevent terminal warnings
 const daysData = JSON.parse(fs.readFileSync("./days.json", "utf-8"));
 
@@ -16,7 +15,7 @@ function pad(num) {
 /**
  * Generates an RFC 5545 compliant iCalendar string for whole-day events
  */
-function generateICal() {
+async function generateICal() {
   const lines = [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
@@ -65,6 +64,10 @@ function generateICal() {
       // Unique ID per event slot to satisfy Google Calendar uniqueness demands
       const uid = `${event.name.replace(/\s+/g, "-").toLowerCase()}-${year}@cyf-calendar`;
 
+      // Awaiting shared fetch function directly
+      console.log(`Fetching description for ${event.name} (${year})...`);
+      const description = await fetchDescription(event);
+
       lines.push("BEGIN:VEVENT");
       lines.push(`UID:${uid}`);
       // DTSTAMP is required by standard protocol to show when the entry was compiled
@@ -73,6 +76,7 @@ function generateICal() {
       lines.push(`DTSTART;VALUE=DATE:${dateStr}`);
       lines.push(`DTEND;VALUE=DATE:${nextDayStr}`);
       lines.push(`SUMMARY:${event.name}`);
+      lines.push(`DESCRIPTION:${description}`);
       lines.push("END:VEVENT");
     }
   }
@@ -82,10 +86,12 @@ function generateICal() {
   // Join with CRLF line breaks to safely conform to iCal specifications
   return lines.join("\r\n");
 }
-
-// Generate the string data
-const icsContent = generateICal();
-
-// Write the file to disk
-fs.writeFileSync("days.ics", icsContent, "utf-8");
-console.log("Successfully generated 'days.ics' containing events from 2020 to 2030!");
+// Call the async function and wait for it to finish before writing to disk
+generateICal()
+  .then((icsContent) => {
+    fs.writeFileSync("days.ics", icsContent, "utf-8");
+    console.log("Successfully generated 'days.ics' containing events from 2020 to 2030!");
+  })
+  .catch((err) => {
+    console.error("Fatal error generating the calendar file:", err);
+  });
