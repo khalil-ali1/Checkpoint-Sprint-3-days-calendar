@@ -60,15 +60,34 @@ Unit tests must be written for at least one non-trivial function
 > Complete (see above)
 
 -----------------------------------------
+<br><br>
+**For groups of at least 2**
+-----------------------------------------
 
-For groups of at least 2
+Run the supplied file with node, generates a file named days.ics. Import that file into a Google Calendar (see instructions above). Verify the same dates as in the web UI.<br>
+The events in the calendar must be whole-day events, and not have a start/end time.<br>
+> After running "node generate-ical.mjs", a file called "days.ics" is created, when imported into google calendar, it shows the same dates as web UI.<br>
+> Events are shown as all day events.
+<img width="300" alt="image" src="https://github.com/user-attachments/assets/c6fe50ff-d28e-4f93-b684-5a24aa3ebd68" />
 
-    Run the supplied file with node, generates a file named days.ics. Import that file into a Google Calendar (see instructions above). Verify the same dates as in the web UI.
-    The events in the calendar must be whole-day events, and not have a start/end time.
-    Logic for calculating dates must be shared between the web generator and the iCal generator.
+-----------------------------------------
 
-For groups of at least 3
+    
+-----------------------------------------
+Logic for calculating dates must be shared between the web generator and the iCal generator.
+> Complete, see common.mjs
+-----------------------------------------
+<br><br>
+**For groups of at least 3**
+-----------------------------------------
+Clicking an Ada Lovelace Day in the web UI displays the below text.<br>
+<img width="300" alt="image" src="https://github.com/user-attachments/assets/c2257962-18b1-4077-960c-084e7659cc39" />
 
-    Clicking an Ada Lovelace Day in the web UI displays the below text.
-    Clicking a Google Calendar event for Ada Lovelace Day displays the below text.
-    Text for Ada Lovelace Day (which must be fetched via API):
+
+-----------------------------------------
+Clicking a Google Calendar event for Ada Lovelace Day displays the below text.<br>
+<img width="300" alt="image" src="https://github.com/user-attachments/assets/5775adbd-665e-4e4d-8603-f702ab2b1c91" />
+
+-----------------------------------------
+Text for Ada Lovelace Day (which must be fetched via API):
+> Complete, See common.mjs
