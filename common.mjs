@@ -1,4 +1,3 @@
-import daysData from "./days.json" with { type: "json" };
 // Map for converting text occurrences to indices
 const OCCURRENCE_MAP = { first: 1, second: 2, third: 3, fourth: 4 };
 
