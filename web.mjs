@@ -175,7 +175,8 @@ function updateCalendar() {
 
         // Attach the click event listener to fetch and display the description
         eventBtn.addEventListener("click", async () => {
-          await showEventDetailsModal(event);
+          const description = await fetchDescription(event);
+          showEventDetailsModal(event, description);
         });
 
         evDiv.appendChild(eventBtn);
@@ -188,7 +189,7 @@ function updateCalendar() {
   container.appendChild(bodyRow);
 }
 
-async function showEventDetailsModal(event) {
+async function fetchDescription(event) {
   // Setup a placeholder and attempt to dynamically fetch the description text
   let descriptionText = "Loading description...";
 
@@ -202,7 +203,10 @@ async function showEventDetailsModal(event) {
   } catch (err) {
     descriptionText = "Network error: Please check your connection.";
   }
+  return descriptionText.trim();
+}
 
+function showEventDetailsModal(event, description) {
   // Build the dark modal background backdrop
   const overlay = document.createElement("div");
   overlay.className = "modal-overlay";
@@ -220,7 +224,7 @@ async function showEventDetailsModal(event) {
 
   const desc = document.createElement("p");
   desc.className = "modal-desc";
-  desc.textContent = descriptionText.trim();
+  desc.textContent = description;
 
   const closeBtn = document.createElement("button");
   closeBtn.className = "modal-close-btn";
