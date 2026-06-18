@@ -2,6 +2,7 @@ import { Temporal } from "@js-temporal/polyfill";
 globalThis.Temporal = Temporal;
 import fs from "node:fs";
 import { getFloatingDay } from "./common.mjs";
+import { fetchDescription } from "./common.mjs";
 // 3. Parse JSON using stable methods to prevent terminal warnings
 const daysData = JSON.parse(fs.readFileSync("./days.json", "utf-8"));
 

@@ -1,5 +1,6 @@
 import { Temporal } from "https://esm.run/@js-temporal/polyfill@0.4.4";
 import { getFloatingDay } from "./common.mjs";
+import { fetchDescription } from "./common.mjs";
 
 // 1. Initialize automatically to the current real-world Month and Year
 let currentYear = Temporal.Now.plainDateISO().year;
@@ -187,23 +188,6 @@ function updateCalendar() {
   }
 
   container.appendChild(bodyRow);
-}
-
-async function fetchDescription(event) {
-  // Setup a placeholder and attempt to dynamically fetch the description text
-  let descriptionText = "Loading description...";
-
-  try {
-    const response = await fetch(event.descriptionURL);
-    if (response.ok) {
-      descriptionText = await response.text();
-    } else {
-      descriptionText = "Error: Description could not be loaded from the server.";
-    }
-  } catch (err) {
-    descriptionText = "Network error: Please check your connection.";
-  }
-  return descriptionText.trim();
 }
 
 function showEventDetailsModal(event, description) {
