@@ -1,5 +1,5 @@
 import { Temporal } from "https://esm.run/@js-temporal/polyfill@0.4.4";
-import { getFloatingDay } from "./common.mjs";
+import { getFloatingDay, fetchDescription } from "./common.mjs";
 
 // 1. Initialize automatically to the current real-world Month and Year
 let currentYear = Temporal.Now.plainDateISO().year;
@@ -175,7 +175,8 @@ function updateCalendar() {
 
         // Attach the click event listener to fetch and display the description
         eventBtn.addEventListener("click", async () => {
-          await showEventDetailsModal(event);
+          const description = await fetchDescription(event);
+          showEventDetailsModal(event, description);
         });
 
         evDiv.appendChild(eventBtn);
@@ -188,21 +189,7 @@ function updateCalendar() {
   container.appendChild(bodyRow);
 }
 
-async function showEventDetailsModal(event) {
-  // Setup a placeholder and attempt to dynamically fetch the description text
-  let descriptionText = "Loading description...";
-
-  try {
-    const response = await fetch(event.descriptionURL);
-    if (response.ok) {
-      descriptionText = await response.text();
-    } else {
-      descriptionText = "Error: Description could not be loaded from the server.";
-    }
-  } catch (err) {
-    descriptionText = "Network error: Please check your connection.";
-  }
-
+function showEventDetailsModal(event, description) {
   // Build the dark modal background backdrop
   const overlay = document.createElement("div");
   overlay.className = "modal-overlay";
@@ -220,7 +207,7 @@ async function showEventDetailsModal(event) {
 
   const desc = document.createElement("p");
   desc.className = "modal-desc";
-  desc.textContent = descriptionText.trim();
+  desc.textContent = description;
 
   const closeBtn = document.createElement("button");
   closeBtn.className = "modal-close-btn";
