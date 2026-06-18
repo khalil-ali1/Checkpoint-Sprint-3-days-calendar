@@ -138,9 +138,9 @@ h2 {
 .event-btn {
     background: none;
     border: none;
-    color: #1c7ed6;
+    color: #0b5ed7;
     font-size: 0.8rem;
-    font-weight: 600;
+    font-weight: 700;
     text-align: left;
     width: 100%;
     cursor: pointer;
@@ -194,17 +194,20 @@ h2 {
 }
 
 .modal-close-btn {
-    padding: 8px 20px;
-    background-color: #228be6;
+    background-color: #212529;
     color: #ffffff;
     border: none;
-    border-radius: 4px;
+    padding: 8px 16px;
+    font-size: 0.95rem;
     font-weight: 600;
+    border-radius: 4px;
     cursor: pointer;
+    margin-top: 16px;
+    float: right;
 }
 
 .modal-close-btn:hover {
-    background-color: #1c7ed6;
+    background-color: #343a40;
 }
 
 @keyframes fadeIn {
